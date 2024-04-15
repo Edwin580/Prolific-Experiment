@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Brightness Perception Experiment</title>
+    <script src="https://unpkg.com/jspsych@7.3.4"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+    <link href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script> // datapipe plugin
+  </head>
+  <body style="background-color: rgb(145,145,145);"></body>
+  <script>
+
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+
+    var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID'); //prolific
+    var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+    var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+      jsPsych.data.addProperties({
+      subject_id: subject_id,
+      study_id: study_id,
+      session_id: session_id
+    });
+    const filename = `${subject_id}.csv`;
+
+    /* create timeline */
+    var timeline = [];
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `<p style="font-size: 20px;">"Welcome to the experiment. Press any key to begin."</p>`
+    };
+    timeline.push(welcome);
+
+    /* define instructions trial */
+    var instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p style="font-size: 20px;">In this experiment, you will be presented with a series of words followed by a luminance probe.</p>
+        <p style="font-size: 20px;">After each word, another luminance probe will be shown and your task is to indicate whether each probe is brighter or darker than the one initially shown.</p>
+        <p style="font-size: 20px;">If you perceive the probe as brighter, press the letter F on the keyboard as quickly as you can.</p>
+        <p style="font-size: 20px;">If you perceive the probe as darker, press the letter J as quickly as you can.</p>
+        <p style="font-size: 20px;">Please respond as quickly and accurately as possible.</p>
+        <p style="font-size: 20px;">Press any key to begin the practice trials.</p>
+      `,
+      post_trial_gap: 1000
+    };
+    timeline.push(instructions);
+
+    /* display the luminance probes prior to trial */
+    var luminance_display = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function() {
+        var luminances = [168]; // 160, 168, 176 -> middle luminance is 168
+        var labels = ['This is the initial probe. The ones presented in the study will be brighter or darker than this.'];
+        var html = '<div style="display: flex; flex-direction: column; align-items: center;">';
+        for (var i = 0; i < luminances.length; i++) {
+            html += `<div style="background-color: rgb(${luminances[i]},${luminances[i]},${luminances[i]}); width: 200px; height: 200px; margin-bottom: 10px;"></div>
+                <p style="font-size: 20px;">${labels[i]}</p>`;
+        }
+        html += '</div>';
+        return html;
+    },
+      choices: "NO_KEYS",
+      trial_duration: 3000,
+      post_trial_gap: 1000
+    };
+
+    /* push them before practice trials */
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<p style="font-size: 20px;">You will now be shown the initial luminance probe. Press any key to continue.</p>',
+      post_trial_gap: 1000
+    });
+    timeline.push(luminance_display);
+
+    /* define practice stimuli */
+    var practice_stimuli = [
+      //{ word: '<div style="font-size: 20px;">sad</div>', luminance: 162, correct_response: "j"}, //48
+      //{ word: '<div style="font-size: 20px;">chair</div>', luminance: 168, correct_response: "g"}, //49
+      //{ word: '<div style="font-size: 20px;">happy</div>', luminance: 174, correct_response: "f"}, //50
+      //ADD 
+      { word: '<div style="font-size: 20px;">power</div>', luminance: 174, correct_response: "f"}, //48
+      { word: '<div style="font-size: 20px;">wise</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">brave</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">generous</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">trust</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">sleep</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">gracious</div>', luminance: 174, correct_response: "f"},
+      { word: '<div style="font-size: 20px;">genius</div>', luminance: 174, correct_response: "f"},
+      //negative  words start here     
+      { word: '<div style="font-size: 20px;">insolent</div>', luminance: 162, correct_response: "j"}, //50
+      { word: '<div style="font-size: 20px;">clumsy</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">beggar</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">sarcastic</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">foolish</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">profane</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">devil</div>', luminance: 162, correct_response: "j"},
+      { word: '<div style="font-size: 20px;">sour</div>', luminance: 162, correct_response: "j"}
+    ];
+
+    jsPsych.randomization.shuffle(practice_stimuli) 
+
+    /* define practice trials */
+    var fixation = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: "NO_KEYS",
+      trial_duration: 800, /* will every trial be the same length? talk this over */
+      data: {task: 'fixation'}
+    };
+
+    var word = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('word'),
+      choices: "NO_KEYS",
+      trial_duration: 400,
+    };
+
+    var probe = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+        var luminance = jsPsych.timelineVariable('luminance');
+        return `<div style="background-color: rgb(${luminance},${luminance},${luminance}); width: 500px; height: 500px;"></div>`;
+      },
+      choices: ['f', 'j'],
+      data: {
+        task: 'response',
+        correct_response: jsPsych.timelineVariable('correct_response')
+      },
+      on_finish: function(data) {
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      },
+      post_trial_gap: function() {
+        return jsPsych.randomization.sampleWithoutReplacement([900, 1000, 1100], 1)[0]; /* time */
+      }
+    };
+
+    var feedback = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+        var last_trial_correct = jsPsych.data.getLastTrialData().values()[0].correct;
+        if(last_trial_correct) {
+          return '<p style="color: green;">Correct!</p>';
+        } else {
+          return '<p style="color: red;">Incorrect.</p>';
+        }
+      },
+      choices: "NO_KEYS",
+      trial_duration: 1000,
+      data: {task: 'feedback'} 
+    }
+
+    var practice_procedure = {
+      timeline: [fixation, word, probe, feedback],
+      timeline_variables: practice_stimuli,
+      randomize_order: true,
+      repetitions: 1 /* change depending on length of lists */
+    };
+    timeline.push(practice_procedure);
+
+    /* add misdirection instructions */
+    var misdirection_instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p style="font-size: 20px;">Great job! You've finished the practice trials.</p>
+        <p style="font-size: 20px;">In the following trials, you will continue to judge if the probe is brighter or darker, like you did in the practice.</p>
+        <p style="font-size: 20px;">However, if you see the same word presented twice in a row, press the spacebar.</p>
+        <p style="font-size: 20px;">Watch out for the repeated words!</p>
+        <p style="font-size: 20px;">Press any key to begin the experiment.</p>
+      `,
+      post_trial_gap: 1000
+    };
+    timeline.push(misdirection_instructions);
+
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<p style="font-size: 20px;">Here is a refresher on the luminance probes that may appear during the trial. Press any key to continue.</p>',
+      post_trial_gap: 1000
+    });
+
+    timeline.push(luminance_display);
+
+    /* define test stimuli */
+    var test_stimuli = [
+    { word: '<div style="font-size: 20px;">power</div>', category: 'positive', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">ethical</div>', category: 'positive', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">candy</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">studious</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">sensible</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">righteous</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">champion</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">pretty</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">kiss</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">dream</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">heaven</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">garden</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">leisure</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">clean</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">cordially</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">talented</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">loyal</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">sincere</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">reliable</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">baby</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">festival</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">neat</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">polite</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">prompt</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">justice</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">sloppy</div>', category: 'negative', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">defeat</div>', category: 'negative', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">touchy</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">vain</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">insane</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">danger</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">cruel</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">neurotic</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">delay</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">poison</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">greedy</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">nasty</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">aimless</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">hostile</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">unfair</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">mediocre</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">diseased</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">mosquito</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">cheat</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">pompous</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">vulgar</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">ugly</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">crude</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">dead</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">rude</div>', category: 'negative', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">opinion</div>', category: 'neutral', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">theory</div>', category: 'neutral', repeated: true, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">idea</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">fact</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">method</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">process</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">structural</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">story</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">sentence</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">task</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">ask</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">dominant</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">conversational</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">elderly</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">young</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">interest</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">adequate</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">even</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">everyday</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">simple</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">baby</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">active</div>', category: 'positive', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">music</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">muscular</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"},
+{ word: '<div style="font-size: 20px;">falling</div>', category: 'neutral', repeated: false, luminance: 168, correct_response: "g"}
+
+    
+    ];
+    var test_stimuli1 = jsPsych.randomization.shuffle(test_stimuli)
+    //shuffles word list
+
+    //making new list with repeated words
+  var modified_test_stimuli = [];
+  for (var i = 0; i < test_stimuli1.length; i++) {
+    var curr = test_stimuli1[i];
+    modified_test_stimuli.push(curr);
+    if (curr.repeated) {
+      modified_test_stimuli.push(curr); // Duplicate the word
+    }
+}
+    //jsPsych.randomization.shuffle(repeated_trials);
+
+    /* define test trials */ 
+    var test = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('word'),
+      choices: "NO_KEYS",
+      trial_duration: 400,
+    };
+
+    var test_probe = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+        var luminance = jsPsych.timelineVariable('luminance');
+        return `<div style="background-color: rgb(${luminance},${luminance},${luminance}); width: 500px; height: 500px;"></div>`;
+      },
+      choices: ['f', 'j', ' '],
+      data: { 
+        task: 'response',
+        correct_response: jsPsych. timelineVariable('correct_response'),
+        repeated: jsPsych.timelineVariable('repeated') //added repeated word trials toaccept input
+      }, 
+      on_finish: function(data) { 
+        data.misdirection_correct = data.response == ' ' && data.repeated;
+
+        //not used.
+        for (var i = 0; i < data.repeated.length; i++) {
+          if (data[i].misdirection_correct == true) {
+            repeat_accuracy += 1;
+          }
+        }
+
+        if(data.response == 'f' || data.response == 'j') {
+          data.brightness_response = data.response;  
+        } else {
+          data.brightness_response = 'NA';
+        }
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      },
+      post_trial_gap: function() {
+        return jsPsych.randomization.sampleWithoutReplacement([900, 1000, 1100], 1)[0]; /* time */
+      }
+    }
+
+    var test_procedure = {
+      timeline: [fixation, test, test_probe],
+      timeline_variables: modified_test_stimuli,  //test_stimuli?
+      randomize_order: false
+    };
+    timeline.push(test_procedure);
+
+    /* define valence instructions */
+    var valence_instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p style="font-size: 20px;">In this final part of the experiment, you will rate the emotional valence of each word you saw.</p>
+        <p style="font-size: 20px;">Press F if you think the word is emotionally positive.</p>
+        <p style="font-size: 20px;">Press J if you think the word is emotionally negative.</p>
+        <p style="font-size: 20px;">Press G if you think the word is emotionally neutral.</p>
+        <p style="font-size: 20px;">Press any key to begin.</p>
+      `,
+      post_trial_gap: 1000
+    }; 
+    timeline.push(valence_instructions);
+
+    /* define valence rating trials */
+    var valence_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('word'),
+      choices: ['f', 'j', 'g'],
+      data: {
+        task: 'valence',
+      },
+      on_finish: function(data) {
+        if(data.response == 'f') {
+          data.rating = 'positive';
+        } else if(data.response == 'j') {
+          data.rating = 'negative';
+        } else if(data.response == 'g') {
+          data.rating = 'neutral';
+        }
+      }
+    };
+
+    var valence_procedure = {
+      timeline: [fixation, valence_trial],
+      timeline_variables: test_stimuli,
+      sample: {
+        type: 'fixed-repetitions',
+        size: 1
+      }
+    };
+    timeline.push(valence_procedure);  
+
+    /* define debrief */
+    var debrief = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p style="font-size: 20px;">The experiment is now complete. Thank you for participating.</p>
+        <p style="font-size: 20px;">In this study, we were interested in how the emotional valence of a word affects how bright you may perceive it.</p>
+        <p style="font-size: 20px;">Every probe present in the main trials had the same luminance, and the repeated words were for misdirection.</p>
+        <p style="font-size: 20px;">The repeated word task was included to ensure that you were paying attention to the words and not just focusing on the luminance probes.</p>
+        <p style="font-size: 20px;">You will receive $2.00 for your participation.</p>
+        <p style="font-size: 20px;">Press any key to view your results.</p>
+      `,
+    };
+    timeline.push(debrief);
+    var debrief_block = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        //var accuracy = Math.round(correct_trials.count() / trials.count() * 100); -> We dont need this bc they will always get 0%.
+        var rt = Math.round(correct_trials.select('rt').mean());
+
+        var misdirection_trials = trials.filter({repeated: true});
+        var misdirection_correct = misdirection_trials.filter({misdirection_correct: true});
+        var misdirection_accuracy = Math.round(misdirection_correct.count() / misdirection_trials.count() *100)
+
+        return `
+          <p>Your average response time was ${rt}ms.</p>
+          <p>In the word repetition task, you correctly identified ${misdirection_accuracy * 2}% of the repeated words.</p> 
+          <p>Press any key to complete the experiment.</p>
+          <p>Thank you for your participation!</p>`; 
+
+      },
+      on_finish: function() {
+        window.location = "https://app.prolific.co/submissions/complete?cc=CNSO8AJT";
+      }
+    };
+    
+    const save_data = { //added for prolific
+      type: jsPsychPipe,
+      action: "save",
+      experiment_id: "vPQ1tiGDQwg7",
+      filename: filename,
+      data_string: () => jsPsych.data.get().csv()
+    };
+    timeline.push(save_data);
+    timeline.push(debrief_block);
+
+    jsPsych.run(timeline);
+
+  </script>
+</html>
