@@ -41,10 +41,10 @@
     var instructions = {
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
-        <p style="font-size: 20px;">In this experiment, you will be presented with a series of words followed by a luminance probe.</p>
-        <p style="font-size: 20px;">After each word, another luminance probe will be shown and your task is to indicate whether each probe is brighter or darker than the one initially shown.</p>
-        <p style="font-size: 20px;">If you perceive the probe as brighter, press the letter F on the keyboard as quickly as you can.</p>
-        <p style="font-size: 20px;">If you perceive the probe as darker, press the letter J as quickly as you can.</p>
+        <p style="font-size: 20px;">In this experiment, you will be presented with a series of words followed by a gray square.</p>
+        <p style="font-size: 20px;">After each word, another square will be shown and your task is to indicate whether each square is brighter or darker than the one initially shown.</p>
+        <p style="font-size: 20px;">If you perceive the square as brighter, press the letter F on the keyboard as quickly as you can.</p>
+        <p style="font-size: 20px;">If you perceive the square as darker, press the letter J as quickly as you can.</p>
         <p style="font-size: 20px;">Please respond as quickly and accurately as possible.</p>
         <p style="font-size: 20px;">Press any key to begin the practice trials.</p>
       `,
@@ -57,7 +57,7 @@
     type: jsPsychHtmlKeyboardResponse,
     stimulus: function() {
         var luminances = [168]; // 160, 168, 176 -> middle luminance is 168
-        var labels = ['This is the initial probe. The ones presented in the study will be brighter or darker than this.'];
+        var labels = ['This is the initial square. The ones presented in the study will be brighter or darker than this.'];
         var html = '<div style="display: flex; flex-direction: column; align-items: center;">';
         for (var i = 0; i < luminances.length; i++) {
             html += `<div style="background-color: rgb(${luminances[i]},${luminances[i]},${luminances[i]}); width: 200px; height: 200px; margin-bottom: 10px;"></div>
@@ -74,7 +74,7 @@
     /* push them before practice trials */
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: '<p style="font-size: 20px;">You will now be shown the initial luminance probe. Press any key to continue.</p>',
+      stimulus: '<p style="font-size: 20px;">You will now be shown the initial square. Press any key to continue.</p>',
       post_trial_gap: 1000
     });
     timeline.push(luminance_display);
@@ -169,7 +169,7 @@
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
         <p style="font-size: 20px;">Great job! You've finished the practice trials.</p>
-        <p style="font-size: 20px;">In the following trials, you will continue to judge if the probe is brighter or darker, like you did in the practice.</p>
+        <p style="font-size: 20px;">In the following trials, you will continue to judge if the square is brighter or darker, like you did in the practice.</p>
         <p style="font-size: 20px;">However, if you see the same word presented twice in a row, press the spacebar.</p>
         <p style="font-size: 20px;">Watch out for the repeated words!</p>
         <p style="font-size: 20px;">Press any key to begin the experiment.</p>
@@ -180,7 +180,7 @@
 
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: '<p style="font-size: 20px;">Here is a refresher on the luminance probes that may appear during the trial. Press any key to continue.</p>',
+      stimulus: '<p style="font-size: 20px;">Here is a refresher on the luminance square that may appear during the trial. Press any key to continue.</p>',
       post_trial_gap: 1000
     });
 
@@ -332,7 +332,7 @@
     var valence_instructions = {
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
-        <p style="font-size: 20px;">In this final part of the experiment, you will rate the emotional valence of each word you saw.</p>
+        <p style="font-size: 20px;">In this final part of the experiment, you will rate the positivity/negativity of each word you saw.</p>
         <p style="font-size: 20px;">Press F if you think the word is emotionally positive.</p>
         <p style="font-size: 20px;">Press J if you think the word is emotionally negative.</p>
         <p style="font-size: 20px;">Press G if you think the word is emotionally neutral.</p>
@@ -377,7 +377,7 @@
       stimulus: `
         <p style="font-size: 20px;">The experiment is now complete. Thank you for participating.</p>
         <p style="font-size: 20px;">In this study, we were interested in how the emotional valence of a word affects how bright you may perceive it.</p>
-        <p style="font-size: 20px;">Every probe present in the main trials had the same luminance, and the repeated words were for misdirection.</p>
+        <p style="font-size: 20px;">Every square present in the main trials had the same brightness, and the repeated words were for misdirection.</p>
         <p style="font-size: 20px;">The repeated word task was included to ensure that you were paying attention to the words and not just focusing on the luminance probes.</p>
         <p style="font-size: 20px;">You will receive $2.00 for your participation.</p>
         <p style="font-size: 20px;">Press any key to view your results.</p>
