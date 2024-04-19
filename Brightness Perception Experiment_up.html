@@ -73,9 +73,11 @@
     /* push them before practice trials */
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p style="font-size: 20px;">You will now be shown the initial square.</p>
+      stimulus: `
+                 <p style="font-size: 20px;">You will now be shown the initial square.</p>
                  <p style="font-size: 20px;">Press the F key if the square is brighter, and press the J key if the square is darker than the initial square.</p>
-                 <p style="font-size: 20px;">Press any key to continue.</p>`,
+                 <p style="font-size: 20px;">Press any key to continue.</p>
+                 `,
       post_trial_gap: 1000
     });
     timeline.push(luminance_display);
