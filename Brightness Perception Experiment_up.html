@@ -57,7 +57,8 @@
     type: jsPsychHtmlKeyboardResponse,
     stimulus: function() {
         var luminances = [168]; // 160, 168, 176 -> middle luminance is 168
-        var labels = ['This is the initial square. The ones presented in the study will be either brighter or darker than this. Press any key to continue.'];
+        var labels = [`This is the initial square. The ones presented in the study will be either brighter or darker than this. Press any key to continue.
+        Press the F key if the square is brighter, and press the J key if the square is darker than the initial square.`];
         var html = '<div style="display: flex; flex-direction: column; align-items: center;">';
         for (var i = 0; i < luminances.length; i++) {
             html += `<div style="background-color: rgb(${luminances[i]},${luminances[i]},${luminances[i]}); width: 200px; height: 200px; margin-bottom: 10px;"></div>
