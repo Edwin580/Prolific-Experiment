@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Brightness Perception Study</title>
+
+    <!-- Pinned, integrity-checked dependencies (verify with `npm run check:sri`). -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspsych@8.3.0/css/jspsych.css" integrity="sha384-+gGUkbtw2BJWSroKW2jzIEXGe7KxdycJ0Bo+CqzpIOSBHOYEHHRWETaV+v2mpdWX" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/jspsych@8.3.0/dist/index.browser.min.js" integrity="sha384-PPMNzYQfqrWFhrOxhpwxXmKK+LDH//fBCLsvA/JIRHOfiuOcZ2j8wJhqo87V4R4B" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-browser-check@2.1.0/dist/index.browser.min.js" integrity="sha384-Gl0MJHqvNsA2o6d5nmuYB+ZkBYb4rJxX2mchuwVS9FkG2umKfV0eVflpWbKMdy/f" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-fullscreen@2.1.0/dist/index.browser.min.js" integrity="sha384-JQEV9wMXFDbTpp1eYJSU9G7uQeyZcLGabno5ZHQJGytUBG19mTZ+ZBV5dsm7m6Mf" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-html-button-response@2.1.0/dist/index.browser.min.js" integrity="sha384-tPGtXEC8xEbInWvarnxvJ3fyzeXwRDS0QjGUts+TGQ9I8OCxiqsv9lxTS3mEN6um" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-html-keyboard-response@2.2.0/dist/index.browser.min.js" integrity="sha384-nazmsslHjLyP2P00IhO151BuH6B/BV+Qtzc3l1h4kFvS9nRP7TuLknK45FN6VzZi" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-instructions@2.1.0/dist/index.browser.min.js" integrity="sha384-wjSYNsw41Zo3TlpW5giDpSwTK0q3Un1NGPsh6gEqlAAKamdt7+TQ5gAL4dat+lT1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jspsych-contrib/plugin-pipe@0.6.0/dist/index.browser.min.js" integrity="sha384-rF2Oi5vMu3eaLUm08aau01hv9DFiIxH9YIJvvbjUQB1kP8CHqFyihiDXcqkwE4Qc" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="css/experiment.css" />
+  </head>
+  <body>
+    <div id="experiment"></div>
+    <noscript><p class="panel">This study requires JavaScript. Please enable it and reload the page.</p></noscript>
+
+    <script src="src/config.js"></script>
+    <script src="src/stimuli.js"></script>
+    <script src="src/design.js"></script>
+    <script src="src/analysis.js"></script>
+    <script src="src/plugin-word-probe.js"></script>
+    <script src="src/results.js"></script>
+    <script src="src/experiment.js"></script>
+  </body>
+</html>
