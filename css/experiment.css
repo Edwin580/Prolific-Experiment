@@ -268,22 +268,6 @@ kbd {
   min-height: 60px;
 }
 
-.spinner {
-  width: 36px;
-  height: 36px;
-  margin: 24px auto;
-  border: 4px solid rgba(0, 0, 0, 0.15);
-  border-top-color: var(--ink);
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* ---------- results screen ---------- */
 
 body.results-mode {
@@ -301,8 +285,6 @@ body.results-mode {
   --cat-neutral: #8f8e88;
   --cat-negative: #eb6834;
   --seq: 42, 120, 214;
-  --notice-bg: #fdf1e9;
-  --notice-border: #eb6834;
   background: var(--surface-0);
   color: var(--text-primary);
 }
@@ -323,8 +305,6 @@ body.results-mode {
     --cat-neutral: #8a8983;
     --cat-negative: #d95926;
     --seq: 57, 135, 229;
-    --notice-bg: #2a1a12;
-    --notice-border: #d95926;
   }
 }
 
@@ -343,8 +323,6 @@ body.results-mode {
   --cat-neutral: #8a8983;
   --cat-negative: #d95926;
   --seq: 57, 135, 229;
-  --notice-bg: #2a1a12;
-  --notice-border: #d95926;
 }
 
 body.results-mode .jspsych-content-wrapper,
@@ -586,18 +564,6 @@ body.results-mode .jspsych-content {
 
 .table-view table {
   margin-top: 12px;
-}
-
-.notice {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  margin-bottom: 24px;
-  background: var(--notice-bg);
-  border-left: 4px solid var(--notice-border);
-  border-radius: 8px;
 }
 
 .actions {

@@ -3,7 +3,7 @@
  *
  * Flow: browser check → consent → fullscreen → instructions → practice
  * (repeated if needed) → main block with cover task (with a break) →
- * valence ratings → save → debrief + personal results.
+ * valence ratings → debrief + personal results + CSV download.
  *
  * Depends on (loaded by experiment.html): jsPsych 8 + plugins, and the
  * BPE_CONFIG / BPE_STIMULI / BPE_DESIGN / BPE_ANALYSIS / BPE_RESULTS globals.
@@ -113,7 +113,7 @@
   timeline.push({
     type: jsPsychHtmlButtonResponse,
     stimulus: panel(`
-      ${session.mode === "demo" ? `<div class="badge">Demo mode — responses are not uploaded</div>` : ""}
+      ${session.mode === "demo" ? `<div class="badge">Demo mode — a shorter version of the study</div>` : ""}
       <h1>${C.study.name}</h1>
       <p class="lede">A short study about how we perceive brightness.</p>
       <ul class="facts">
@@ -328,18 +328,6 @@
 
   timeline.push({ type: jsPsychFullscreen, fullscreen_mode: false, delay_after: 0, data: { task: "fullscreen" } });
 
-  // Upload (Prolific runs only), with retries and a manual fallback.
-  if (session.mode === "prolific" && session.simulate === null) {
-    timeline.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: panel(`<h2>Saving your responses…</h2><div class="spinner" aria-hidden="true"></div>
-        <p class="muted" id="save-status">Please don't close this window.</p>`),
-      choices: "NO_KEYS",
-      data: { task: "save" },
-      on_load: () => saveData().then((result) => jsPsych.finishTrial(result)),
-    });
-  }
-
   // ---------- data ----------
 
   function attachQualityMetrics() {
@@ -355,28 +343,6 @@
     return jsPsych.data.get().ignore("stimulus").csv();
   }
 
-  async function saveData() {
-    const status = () => document.getElementById("save-status");
-    const body = csv();
-    for (let attempt = 1; attempt <= C.datapipe.max_attempts; attempt++) {
-      try {
-        // saveData resolves (rather than rejects) with an Error on network
-        // failure, and with { error } when the server refuses the upload.
-        const result = await jsPsychPipe.saveData(C.datapipe.experiment_id, filename, body);
-        if (result instanceof Error) throw result;
-        if (!result || result.error) throw new Error(result?.error ?? "empty response");
-        return { save_success: true, save_attempts: attempt, filename };
-      } catch (err) {
-        console.warn(`Save attempt ${attempt} failed:`, err);
-        if (attempt < C.datapipe.max_attempts) {
-          if (status()) status().textContent = `Connection problem — retrying (${attempt + 1}/${C.datapipe.max_attempts})…`;
-          await new Promise((r) => setTimeout(r, C.datapipe.retry_base_ms * 2 ** (attempt - 1)));
-        }
-      }
-    }
-    return { save_success: false, save_attempts: C.datapipe.max_attempts, filename };
-  }
-
   function download() {
     const blob = new Blob([csv()], { type: "text/csv" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: filename });
@@ -388,14 +354,13 @@
 
   function finalContext() {
     const rows = jsPsych.data.get().values();
-    const save = rows.find((r) => r.task === "save");
     return {
       config: C,
       session,
       keys,
       summary: A.summarize(rows, C.design),
-      saveFailed: save ? !save.save_success : false,
       download,
+      autoDownload: session.mode === "prolific" && session.simulate === null && C.data.auto_download_in_prolific,
       completionUrl: session.mode === "prolific" ? C.prolific.completion_url + C.prolific.completion_code : null,
     };
   }

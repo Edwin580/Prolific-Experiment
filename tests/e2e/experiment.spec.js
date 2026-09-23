@@ -28,6 +28,20 @@ test("data-only simulation runs end to end and produces well-formed data", async
   expect(header).toContain('"repeat_pressed"');
 });
 
+test("the results page downloads the data as a CSV file", async ({ page }) => {
+  await page.goto("/experiment.html?simulate=data-only&seed=csv");
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: /Download data/ }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^demo_anon_\d{8}T\d{6}_[A-Za-z0-9]+\.csv$/);
+  const csv = require("node:fs").readFileSync(await download.path(), "utf8");
+  const lines = csv.trim().split("\n");
+  expect(lines[0]).toContain('"word"');
+  const expected = await page.evaluate(() => window.BPE.testSequence.length);
+  expect(lines.filter((l) => l.includes('"test"')).length).toBe(expected);
+});
+
 test("a fixed seed reproduces the same trial order", async ({ page }) => {
   const order = async () => {
     await page.goto("/experiment.html?simulate=data-only&seed=abc123");

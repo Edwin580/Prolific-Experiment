@@ -9,7 +9,7 @@ negative words comes from perception, not from the stimulus.
 | Try it | URL |
 |---|---|
 | Project page | `index.html` |
-| Short demo (no data uploaded) | `experiment.html?demo=1` |
+| Short demo | `experiment.html?demo=1` |
 | Watch a simulated participant | `experiment.html?simulate=visual` |
 | Jump straight to a results dashboard | `experiment.html?simulate=data-only` |
 | Live Prolific study | `experiment.html?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}` |
@@ -40,8 +40,8 @@ or any static host.
    halfway through.
 6. **Valence ratings.** Each word is rated positive, neutral or negative. This checks that
    participants agree with the word categories.
-7. **Upload** to [DataPipe](https://pipe.jspsych.org)/OSF, then the **debrief** and a personal results
-   dashboard, then the redirect to Prolific.
+7. **Debrief** and a personal results dashboard. The data is **downloaded as a CSV file**
+   (automatically in Prolific mode), then the participant returns to Prolific.
 
 Each trial shows a fixation cross for 800 ms, the word for 400 ms, and then the square until the
 participant responds. The gap between trials is 900, 1000 or 1100 ms.
@@ -52,7 +52,7 @@ participant responds. The gap between trials is 900, 1000 or 1100 ms.
 index.html                 project / landing page
 experiment.html            the experiment (loads the scripts below)
 css/experiment.css         styles (uniform grey during the task, colour only on the results page)
-src/config.js              every tunable parameter: timings, luminances, keys, DataPipe ID, completion code
+src/config.js              every tunable parameter: timings, luminances, keys, completion code
 src/stimuli.js             practice and test word lists (plain data)
 src/design.js              pure logic: session/mode resolution, trial sequences, break placement, file names
 src/analysis.js            pure logic: per-category summaries, d′, rating agreement
@@ -82,9 +82,11 @@ and `src/stimuli.js`.
   to show. It is clearly labelled as simulated.
 - **Data quality.** Each row carries `blur_events` and `fullscreen_exits`. Responses outside 150–3000 ms
   are excluded from the summaries. The raw data is always kept.
-- **Saving.** The upload is retried 3 times with exponential backoff. If it still fails, the participant
-  gets a download button. File names are unique (`prolific_<PID>_<timestamp>_<random>.csv`), so
-  sessions never overwrite each other. Demo and simulated sessions never upload.
+- **Data is CSV only.** Nothing is uploaded to a server or third-party service. At the end, the data
+  is exported in the browser as a CSV file. In Prolific mode it downloads automatically
+  (`data.auto_download_in_prolific` in the config); every mode also has a download button. File names
+  are unique (`prolific_<PID>_<timestamp>_<random>.csv`), so files never overwrite each other. The
+  bulky HTML `stimulus` column is left out, because each row already has `word`.
 - **Dependencies.** Every CDN script is pinned to an exact version and has a Subresource Integrity
   hash. `npm run check:sri` checks both against `package.json`, and CI runs it.
 - **Optional key counterbalancing.** Set `design.counterbalance_keys: true` to swap F/J for a random
@@ -94,7 +96,7 @@ and `src/stimuli.js`.
 
 | column | meaning |
 |---|---|
-| `task` | `practice`, `test`, `valence`, `instructions`, `consent`, `browser_check`, `save`, … |
+| `task` | `practice`, `test`, `valence`, `instructions`, `consent`, `browser_check`, `fullscreen` |
 | `word`, `category` | prime word and its a-priori valence |
 | `luminance` | probe grey level (always 168 in `test`) |
 | `response` | `brighter` / `darker` (probe trials) |
@@ -114,7 +116,8 @@ and `src/stimuli.js`.
 v1 was a single HTML file. These issues were fixed:
 
 - The DataPipe plugin was loaded **without a version**. It now resolves to a release that requires
-  jsPsych 8, which is incompatible with the jsPsych 7.3.4 the page loaded.
+  jsPsych 8, which is incompatible with the jsPsych 7.3.4 the page loaded. DataPipe has been removed;
+  data is now saved as a CSV download.
 - Main-trial `correct_response` was `"g"`, a key that couldn't be pressed. So *correct* was always false,
   and the debrief's "average response time" (taken over correct trials) came out as `NaN`.
 - Both showings of a repeated word were flagged `repeated: true`. That made the first showing count as
@@ -124,8 +127,7 @@ v1 was a single HTML file. These issues were fixed:
 - A stray `// datapipe plugin` comment sat outside a `<script>` tag in `<head>`.
 - Data files were named `${PROLIFIC_PID}.csv`. Without a PID this became `null.csv`, so different
   sessions could collide.
-- There was no consent screen, no browser or size check, no fullscreen, no attention metrics, and no
-  retry or fallback if the upload failed.
+- There was no consent screen, no browser or size check, no fullscreen, and no attention metrics.
 
 ## Notes for the researcher
 

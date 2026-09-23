@@ -135,13 +135,13 @@
           <div class="card"><h2>Reproducible randomisation</h2><p>Each session is seeded and the seed is stored, so any participant's exact trial order can be regenerated. Pass <code>?seed=…</code> to fix it.</p></div>
           <div class="card"><h2>Signal-detection scoring</h2><p>The cover task is scored as hits vs. false alarms with a corrected d′, instead of a raw percentage.</p></div>
           <div class="card"><h2>Built-in simulation</h2><p>jsPsych's simulation mode runs a whole virtual participant — visually or data-only — for demos and automated tests.</p></div>
-          <div class="card"><h2>Robust data capture</h2><p>DataPipe upload with retries and a download fallback, unique file names, focus-loss and fullscreen-exit counts for quality control.</p></div>
+          <div class="card"><h2>Local CSV data</h2><p>No server or third-party upload: data is exported as a CSV in the browser, with unique file names and focus-loss and fullscreen-exit counts for quality control.</p></div>
           <div class="card"><h2>No build step</h2><p>Static files with pinned, integrity-checked CDN dependencies. Unit tests in Node, end-to-end tests in Playwright, run in CI.</p></div>
         </div>
       </section>
 
       <footer>
-        Demo sessions never upload data. Prolific participants arrive with <code>?PROLIFIC_PID=…</code>.
+        Data never leaves the browser except as a CSV download. Prolific participants arrive with <code>?PROLIFIC_PID=…</code>.
         Contact: Edwin Cortazo — <a href="mailto:edwincortazo@gmail.com">edwincortazo@gmail.com</a>
       </footer>
     </main>

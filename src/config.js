@@ -26,11 +26,10 @@
       completion_url: "https://app.prolific.com/submissions/complete?cc=",
     },
 
-    datapipe: {
-      // https://pipe.jspsych.org experiment ID. Data is only sent in Prolific mode.
-      experiment_id: "vPQ1tiGDQwg7",
-      max_attempts: 3,
-      retry_base_ms: 1000,
+    data: {
+      // Data is saved as a CSV file in the participant's browser; nothing is uploaded.
+      // In Prolific mode the file downloads automatically when the study ends.
+      auto_download_in_prolific: true,
     },
 
     // Background grey of the whole page, as a single 8-bit channel value.
