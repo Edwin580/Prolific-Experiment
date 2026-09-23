@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brightness Perception Experiment</title>
+    <meta name="description" content="Does the emotional meaning of a word change how bright a grey square looks? An online jsPsych experiment." />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f4f2;
+        --surface: #fcfcfb;
+        --border: #e2e1dc;
+        --text: #0b0b0b;
+        --text-2: #52514e;
+        --muted: #77766f;
+        --accent: #1f5fae;
+        --on-accent: #fff;
+        --grey: rgb(145, 145, 145);
+        --probe: rgb(168, 168, 168);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          color-scheme: dark;
+          --bg: #121211;
+          --surface: #1a1a19;
+          --border: #2e2e2c;
+          --text: #fff;
+          --text-2: #c3c2b7;
+          --muted: #9a9990;
+          --accent: #6aa6ef;
+          --on-accent: #0b0b0b;
+        }
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #121211;
+        --surface: #1a1a19;
+        --border: #2e2e2c;
+        --text: #fff;
+        --text-2: #c3c2b7;
+        --muted: #9a9990;
+        --accent: #6aa6ef;
+        --on-accent: #0b0b0b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      main { max-width: 960px; margin: 0 auto; padding: 56px 16px 72px; }
+      .eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+      h1 { font-size: clamp(32px, 5.5vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 10px 0 16px; max-width: 16ch; }
+      h2 { font-size: 20px; margin: 0 0 8px; }
+      .lede { font-size: 19px; color: var(--text-2); max-width: 60ch; margin: 0 0 28px; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px;
+        font: 600 16px system-ui, sans-serif; text-decoration: none; color: var(--text);
+        background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      }
+      .btn:hover { border-color: var(--muted); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+      .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+      .stage {
+        margin: 48px 0; padding: 36px 16px; background: var(--grey); border-radius: 16px;
+        display: flex; align-items: center; justify-content: center; gap: clamp(8px, 3vw, 28px); color: #111;
+      }
+      .frame { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+      .screen {
+        width: clamp(72px, 16vw, 140px); aspect-ratio: 1; display: grid; place-items: center;
+        border: 1.5px dashed rgba(0, 0, 0, 0.4); border-radius: 10px; font-size: clamp(15px, 2.4vw, 22px); font-weight: 500;
+      }
+      .screen.fix { font-size: clamp(24px, 4vw, 40px); }
+      .screen .sq { width: 72%; aspect-ratio: 1; background: var(--probe); }
+      .frame small { font-size: 12px; font-family: ui-monospace, Menlo, monospace; }
+      .arrow { font-size: 22px; opacity: 0.6; }
+      .word::after { content: "garden"; animation: words 4.5s steps(1) infinite; }
+      @keyframes words { 0% { content: "garden"; } 33% { content: "method"; } 66% { content: "poison"; } }
+      @media (prefers-reduced-motion: reduce) { .word::after { animation: none; } }
+
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+      .card p { margin: 0; color: var(--text-2); font-size: 15.5px; }
+      section + section { margin-top: 48px; }
+      .section-title { font-size: 26px; letter-spacing: -0.01em; margin: 0 0 16px; }
+      ol.flow { padding-left: 1.2em; color: var(--text-2); }
+      ol.flow li { margin: 6px 0; }
+      ol.flow strong { color: var(--text); }
+      code { font: 14px ui-monospace, Menlo, monospace; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+      footer { margin-top: 56px; font-size: 14px; color: var(--muted); }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Online perception experiment · jsPsych 8</p>
+      <h1>Do happy words make grey look brighter?</h1>
+      <p class="lede">
+        Participants read a word, then judge whether a grey square is brighter or darker than a reference.
+        In the main block every square is <strong>physically identical</strong> — so any systematic difference
+        between positive and negative words is the mind, not the monitor.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="experiment.html?demo=1">Try the demo →</a>
+        <a class="btn" href="experiment.html?simulate=visual">Watch a simulated participant</a>
+        <a class="btn" href="experiment.html?simulate=data-only">Skip to a results dashboard</a>
+      </div>
+
+      <div class="stage" aria-label="Trial sequence: fixation, word, probe square">
+        <div class="frame"><div class="screen fix">+</div><small>800 ms</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="frame"><div class="screen word"></div><small>400 ms</small></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="frame"><div class="screen"><div class="sq"></div></div><small>F brighter · J darker</small></div>
+      </div>
+
+      <section>
+        <h2 class="section-title">The study</h2>
+        <ol class="flow">
+          <li><strong>Practice</strong> — six trials whose squares really are brighter or darker, with feedback; repeated automatically if accuracy is low.</li>
+          <li><strong>Main block</strong> — 74 words (positive, negative, neutral), all followed by the reference grey. A cover task (press Space when a word repeats) keeps attention on the words.</li>
+          <li><strong>Valence ratings</strong> — participants rate each word, a manipulation check on the categories.</li>
+          <li><strong>Debrief</strong> — the reveal, plus a personal results dashboard computed in the browser.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 class="section-title">Under the hood</h2>
+        <div class="cards">
+          <div class="card"><h2>Frame-timed custom plugin</h2><p>Fixation, word and probe run as one <code>requestAnimationFrame</code>-scheduled trial. Actual on-screen durations are measured and saved with every row.</p></div>
+          <div class="card"><h2>Reproducible randomisation</h2><p>Each session is seeded and the seed is stored, so any participant's exact trial order can be regenerated. Pass <code>?seed=…</code> to fix it.</p></div>
+          <div class="card"><h2>Signal-detection scoring</h2><p>The cover task is scored as hits vs. false alarms with a corrected d′, instead of a raw percentage.</p></div>
+          <div class="card"><h2>Built-in simulation</h2><p>jsPsych's simulation mode runs a whole virtual participant — visually or data-only — for demos and automated tests.</p></div>
+          <div class="card"><h2>Local CSV data</h2><p>No server or third-party upload: data is exported as a CSV in the browser, with unique file names and focus-loss and fullscreen-exit counts for quality control.</p></div>
+          <div class="card"><h2>No build step</h2><p>Static files with pinned, integrity-checked CDN dependencies. Unit tests in Node, end-to-end tests in Playwright, run in CI.</p></div>
+        </div>
+      </section>
+
+      <footer>
+        Data never leaves the browser except as a CSV download. Prolific participants arrive with <code>?PROLIFIC_PID=…</code>.
+        Contact: Edwin Cortazo — <a href="mailto:edwincortazo@gmail.com">edwincortazo@gmail.com</a>
+      </footer>
+    </main>
+  </body>
+</html>
