@@ -4,218 +4,224 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Brightness Priming Study</title>
-    <meta name="description" content="Do positive words make a grey square look brighter? A browser experiment you can try, inspect and simulate." />
+    <meta name="description" content="Do positive words make a grey square look brighter? An online experiment with a working demo, a frame timer and a power simulator." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Source+Code+Pro:wght@400;500&display=swap" />
     <link rel="stylesheet" href="site/site.css" />
   </head>
   <body>
-    <header class="top">
-      <a class="brand" href="#">Brightness priming</a>
-      <nav>
-        <a href="#try">Try it</a>
-        <a href="#timing">Timing</a>
-        <a href="#power">Power</a>
-        <a href="#build">Build</a>
-        <a href="https://github.com/Edwin580/Prolific-Experiment">GitHub</a>
-      </nav>
-    </header>
+    <article>
+      <header>
+        <h1>Does a good word make grey look brighter?</h1>
+        <p class="subtitle">An online brightness judgement experiment, with the demo, the timing and the power analysis on one page</p>
+        <p class="byline">Edwin Cortazo · <a href="https://github.com/Edwin580/Prolific-Experiment">source on GitHub</a></p>
+      </header>
 
-    <main>
-      <section class="hero">
-        <p class="kicker">Perception experiment · jsPsych 8 · run on Prolific</p>
-        <h1>Do happy words make grey look brighter?</h1>
-        <p class="lede">
-          People read a word, then say whether a grey square is brighter or darker than a reference.
-          In the main block every square is the same grey, <span class="mono">rgb(168, 168, 168)</span>.
-          If positive words still get more “brighter” answers, the difference is in the viewer.
+      <section>
+        <p>
+          People tend to link good with light and bad with dark. Meier, Robinson and Clore (2004) found that people
+          judge words faster when positive words appear in white and negative words in black, and Meier et al.
+          (2007) found the link runs the other way too: what a word means can push a later brightness judgement.
+          This study tests that second claim online.
         </p>
-        <div class="actions">
-          <a class="btn primary" href="#try">Try 12 trials here</a>
-          <a class="btn" href="experiment.html?demo=1">Run the full demo study</a>
-          <a class="btn" href="experiment.html?simulate=visual">Watch a simulated participant</a>
+        <p>
+          On each trial a participant reads a word, then sees a grey square and says whether it is brighter or
+          darker than a reference square they saw at the start. In the main block every square is the reference
+          grey, <span class="code">rgb(168, 168, 168)</span>. Nothing about the stimulus changes, so if positive words
+          still get more “brighter” answers than negative ones, the effect comes from the viewer.
+        </p>
+        <p>
+          It runs on <a href="https://www.jspsych.org">jsPsych</a> (de Leeuw, 2015) and recruits through Prolific.
+          You can <a href="experiment.html?demo=1">take a shortened version</a>,
+          <a href="experiment.html?simulate=visual">watch a simulated participant</a> take it, or
+          <a href="experiment.html?simulate=data-only">go straight to the results screen</a>. The rest of this page
+          lets you try the task here and look at two problems I had to solve along the way.
+        </p>
+      </section>
+
+      <section id="try">
+        <h2>1. The task</h2>
+        <p>
+          Below is the main block cut down to twelve trials, four from each word category. Timing matches the real
+          study: a cross for 800 ms, the word for 400 ms, then the square until you answer. Press
+          <kbd>F</kbd> if the square looks brighter than the one shown before you start, <kbd>J</kbd> if darker.
+          On a phone, tap the buttons.
+        </p>
+
+        <figure class="wide">
+          <div class="lab">
+            <div class="stage" id="stage" tabindex="0" aria-live="polite">
+              <div class="stage-idle" id="stage-idle">
+                <div class="probe small" aria-hidden="true"></div>
+                <p>Reference square. Keep it in mind.</p>
+                <button id="start">Start</button>
+              </div>
+              <div class="stage-run" id="stage-run" hidden>
+                <div class="slot">
+                  <span class="fix" id="fix">+</span>
+                  <span class="word" id="word" hidden></span>
+                  <div class="probe" id="probe" hidden></div>
+                </div>
+                <div class="answer" id="answer">
+                  <button class="key" data-r="brighter">F &nbsp;brighter</button>
+                  <button class="key" data-r="darker">J &nbsp;darker</button>
+                </div>
+                <div class="counter" id="counter"></div>
+              </div>
+              <div class="stage-done" id="stage-done" hidden></div>
+            </div>
+
+            <div class="log">
+              <table class="booktabs">
+                <thead><tr><th>#</th><th>word</th><th>category</th><th>answer</th><th class="n">rt</th><th class="n">word ms</th></tr></thead>
+                <tbody id="rows"><tr class="empty"><td colspan="6">No trials yet.</td></tr></tbody>
+              </table>
+              <button class="textbtn" id="csv" disabled>download these rows as CSV</button>
+            </div>
+          </div>
+          <figcaption><b>Figure 1.</b> The task, running in your browser. The table fills in one row per trial with the
+            same fields the real study saves. “word ms” is how long the word was actually on screen.</figcaption>
+        </figure>
+
+        <div id="reveal" hidden>
+          <p>
+            All twelve squares were <span class="code">rgb(168, 168, 168)</span>, identical to the reference. Figure 2
+            shows how often you said brighter after each kind of word. With twelve trials this is mostly noise; the
+            full study has 80 trials per person and the test is across people.
+          </p>
+          <figure>
+            <div id="bars"></div>
+            <figcaption><b>Figure 2.</b> Your share of “brighter” answers by word category. The vertical line is 50%,
+              which is where an unbiased observer would land. <span id="trial-stats"></span></figcaption>
+          </figure>
         </div>
       </section>
 
-      <!-- 01 -->
-      <section id="try" class="block">
-        <div class="block-head">
-          <span class="num">01</span>
-          <div>
-            <h2>Be a participant</h2>
-            <p>Same timing as the real study: a cross for 800 ms, a word for 400 ms, then a square. Answer with
-              <kbd>F</kbd> for brighter and <kbd>J</kbd> for darker, or tap the buttons.</p>
-          </div>
-        </div>
+      <section id="timing">
+        <h2>2. Frames</h2>
+        <p>
+          A browser can only change what is on screen once per frame. On a 60 Hz monitor a frame lasts about
+          16.7 ms, so a 400 ms word is really 24 frames, and one late frame makes it 417 ms. Bridges et al. (2020)
+          measured this kind of timing error across experiment software and browsers.
+        </p>
+        <p>
+          The default jsPsych plugins use timers for this. I wrote a plugin that runs the cross, word and square as
+          one trial and makes every change inside <span class="code">requestAnimationFrame</span>. It changes the
+          display on the frame where less than half a frame of the target time is left, and writes the measured
+          durations into the data, so a dropped frame shows up in the row for that trial.
+        </p>
 
-        <div class="lab">
-          <div class="stage" id="stage" tabindex="0" aria-live="polite">
-            <div class="stage-idle" id="stage-idle">
-              <div class="probe small" aria-hidden="true"></div>
-              <p>This is the reference grey. Remember it.</p>
-              <button class="btn primary" id="start">Start</button>
+        <figure class="wide">
+          <div class="pair">
+            <div>
+              <canvas id="frames" height="150" aria-label="Recent frame intervals"></canvas>
+              <p class="readout" id="frame-stats">Measuring…</p>
             </div>
-            <div class="stage-run" id="stage-run" hidden>
-              <div class="slot">
-                <span class="fix" id="fix">+</span>
-                <span class="word" id="word" hidden></span>
-                <div class="probe" id="probe" hidden></div>
-              </div>
-              <div class="answer" id="answer">
-                <button class="key" data-r="brighter"><kbd>F</kbd> brighter</button>
-                <button class="key" data-r="darker"><kbd>J</kbd> darker</button>
-              </div>
-              <div class="counter mono" id="counter"></div>
-            </div>
-            <div class="stage-done" id="stage-done" hidden></div>
-          </div>
-
-          <div class="log">
-            <div class="log-head">
-              <span>data, one row per trial</span>
-              <button class="link" id="csv" disabled>Download CSV</button>
-            </div>
-            <div class="log-scroll">
-              <table class="mono">
-                <thead><tr><th>#</th><th>word</th><th>cat</th><th>resp</th><th>rt</th><th>word_ms</th></tr></thead>
-                <tbody id="rows"><tr class="empty"><td colspan="6">Rows appear here as you answer.</td></tr></tbody>
+            <div>
+              <label class="slider">Target duration: <span class="code" id="target-out">400 ms</span>
+                <input type="range" id="target" min="17" max="1000" step="1" value="400" />
+              </label>
+              <table class="booktabs quant">
+                <thead><tr><th>display</th><th class="n">frames</th><th class="n">shown</th><th class="n">error</th></tr></thead>
+                <tbody id="quant"></tbody>
               </table>
             </div>
           </div>
-        </div>
-
-        <div class="reveal" id="reveal" hidden>
-          <div class="reveal-text">
-            <h3>Every square you judged was identical.</h3>
-            <p>All 12 were <span class="mono">rgb(168, 168, 168)</span>, the same as the reference. Any pattern below
-              comes from you, and twelve trials from one person is mostly noise. The real study uses 80 trials per person
-              and pools across participants.</p>
-          </div>
-          <div class="result-grid">
-            <div class="bars" id="bars"></div>
-            <dl class="stats mono" id="trial-stats"></dl>
-          </div>
-        </div>
+          <figcaption><b>Figure 3.</b> Left: the last 240 frame intervals on your display, measured live; the dashed
+            line is the median and red bars are frames that took more than one and a half times as long. Right: what a
+            target duration becomes once it is rounded to whole frames, on your display and on common refresh rates.
+            <span id="fps-live"></span></figcaption>
+        </figure>
       </section>
 
-      <!-- 02 -->
-      <section id="timing" class="block">
-        <div class="block-head">
-          <span class="num">02</span>
-          <div>
-            <h2>Your display, measured live</h2>
-            <p>Browsers can only change the screen on a frame. A 400 ms word on a 60 Hz monitor is really 24 frames,
-              and one dropped frame stretches it by 17 ms. The custom trial plugin schedules every change on
-              <span class="mono">requestAnimationFrame</span>, switches when less than half a frame remains, and saves the
-              measured duration on every row.</p>
-          </div>
-        </div>
+      <section id="power">
+        <h2>3. Sample size</h2>
+        <p>
+          Before running it I wanted to know how many people the study needs. Effects like this are small and people
+          differ, so I simulated it. Each simulated person gets their own bias, drawn around the true effect, and
+          answers each trial by coin flip weighted by that bias. The group is then tested with a one sample
+          <i>t</i> test on each person's positive minus negative difference. Repeat that a thousand times and
+          the share of significant results is the power.
+        </p>
 
-        <div class="timing">
-          <div class="panel">
-            <div class="panel-head"><span>frame intervals, last 240 frames</span><span class="mono" id="fps-live">measuring…</span></div>
-            <canvas id="frames" height="160" aria-label="Recent frame intervals"></canvas>
-            <dl class="stats mono" id="frame-stats"></dl>
+        <figure class="wide">
+          <div class="pair sim">
+            <div class="controls">
+              <label class="slider">True effect: <span class="code" id="o-effect"></span>
+                <input type="range" id="effect" min="0" max="0.2" step="0.005" value="0.06" /></label>
+              <label class="slider">Spread between people (SD): <span class="code" id="o-spread"></span>
+                <input type="range" id="spread" min="0" max="0.25" step="0.005" value="0.10" /></label>
+              <label class="slider">Participants: <span class="code" id="o-n"></span>
+                <input type="range" id="n" min="5" max="300" step="5" value="60" /></label>
+              <label class="slider">Trials per category: <span class="code" id="o-trials"></span>
+                <input type="range" id="trials" min="8" max="60" step="1" value="24" /></label>
+              <button id="run">Run again</button>
+              <p class="readout" id="sim-stats"></p>
+            </div>
+            <div>
+              <svg id="hist" class="chart" role="img" aria-label="Histogram of observed effects"></svg>
+              <svg id="curve" class="chart" role="img" aria-label="Power curve"></svg>
+            </div>
           </div>
-          <div class="panel">
-            <div class="panel-head"><span>what a target duration becomes</span></div>
-            <label class="slider">
-              <span>target <b class="mono" id="target-out">400 ms</b></span>
-              <input type="range" id="target" min="17" max="1000" step="1" value="400" />
-            </label>
-            <table class="quant mono">
-              <thead><tr><th>display</th><th>frames</th><th>shown</th><th>error</th></tr></thead>
-              <tbody id="quant"></tbody>
-            </table>
-          </div>
-        </div>
+          <figcaption><b>Figure 4.</b> Top: the group effect each of 1,000 simulated studies found, dark where
+            <i>p</i> &lt; .05. <span id="sim-progress"></span> Bottom: power against sample size from a normal
+            approximation, with the simulated result as a dot. The effect is the difference in the share of brighter
+            answers, so 0.06 is roughly 53% after positive words against 47% after negative ones. Moving a slider
+            reruns it.</figcaption>
+        </figure>
+
+        <aside class="note">
+          The <i>t</i> distribution comes from the regularized incomplete beta function, so there is no stats library
+          on this page. Both calculations are in <a href="https://github.com/Edwin580/Prolific-Experiment/blob/main/site/stats.js">site/stats.js</a>
+          and checked against printed tables in the unit tests.
+        </aside>
       </section>
 
-      <!-- 03 -->
-      <section id="power" class="block">
-        <div class="block-head">
-          <span class="num">03</span>
-          <div>
-            <h2>How many people would it take?</h2>
-            <p>Pick an effect size and a sample. The simulator runs a thousand virtual studies in your browser. Each
-              participant gets their own bias, answers binomially, and the group is tested with a one sample
-              <i>t</i> test on the positive minus negative difference. Power is the share of studies that reach
-              <i>p</i> &lt; .05.</p>
-          </div>
-        </div>
-
-        <div class="sim">
-          <div class="panel controls">
-            <label class="slider"><span>true effect <b class="mono" id="o-effect"></b></span>
-              <input type="range" id="effect" min="0" max="0.2" step="0.005" value="0.06" /></label>
-            <label class="slider"><span>person to person spread (SD) <b class="mono" id="o-spread"></b></span>
-              <input type="range" id="spread" min="0" max="0.25" step="0.005" value="0.10" /></label>
-            <label class="slider"><span>participants <b class="mono" id="o-n"></b></span>
-              <input type="range" id="n" min="5" max="300" step="5" value="60" /></label>
-            <label class="slider"><span>trials per category <b class="mono" id="o-trials"></b></span>
-              <input type="range" id="trials" min="8" max="60" step="1" value="24" /></label>
-            <button class="btn primary" id="run">Run 1,000 studies</button>
-            <p class="fine">Effect is the difference in the share of “brighter” answers after positive and negative words.
-              0.06 means 56% versus 50%, roughly.</p>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>observed group effect in each simulated study</span><span class="mono" id="sim-progress"></span></div>
-            <svg id="hist" class="chart" role="img" aria-label="Histogram of observed effects"></svg>
-            <dl class="stats big mono" id="sim-stats"></dl>
-            <div class="panel-head sub"><span>power by sample size (analytic)</span></div>
-            <svg id="curve" class="chart" role="img" aria-label="Power curve"></svg>
-          </div>
-        </div>
+      <section id="build">
+        <h2>4. Implementation</h2>
+        <p>
+          The site is plain HTML and JavaScript with no build step. The pieces worth reading:
+        </p>
+        <dl class="files">
+          <dt><a href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/plugin-word-probe.js">src/plugin-word-probe.js</a></dt>
+          <dd>The trial plugin described in section 2. It records the repeat key and the brightness answer separately,
+            which fixed a bug in the first version where pressing Space on a repeated word threw away the brightness
+            answer. It also implements jsPsych's simulation mode, which is how the simulated participant works.</dd>
+          <dt><a href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/analysis.js">src/analysis.js</a></dt>
+          <dd>Per category summaries and reaction time exclusions. The repeat task is scored as <i>d</i>′ with the
+            log linear correction from Hautus (1995), so a perfect score doesn't produce an infinite value. The same file
+            runs at the end of the study, on Figure 2 above, and in the Node tests.</dd>
+          <dt><a href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/design.js">src/design.js</a></dt>
+          <dd>Trial order, repeated words, where the break goes (never between a word and its repeat) and data file
+            names. Every session is seeded and the seed is saved, so adding <span class="code">?seed=</span> to the URL
+            replays a session's exact order.</dd>
+          <dt><a href="https://github.com/Edwin580/Prolific-Experiment/tree/main/tests">tests/</a></dt>
+          <dd>Unit tests in Node, and Playwright tests that run whole simulated sessions, press real keys, decline
+            consent and check the CSV download. CI also checks every CDN script against a pinned version and its
+            integrity hash.</dd>
+        </dl>
+        <p>
+          Data is never sent anywhere. At the end of a session the browser saves it as a CSV file, and in Prolific
+          mode that happens automatically before the participant is sent back.
+        </p>
       </section>
 
-      <!-- 04 -->
-      <section id="build" class="block">
-        <div class="block-head">
-          <span class="num">04</span>
-          <div>
-            <h2>How it is built</h2>
-            <p>Plain static files, no build step. The analysis code on this page is the same file the study uses at the end of
-              a session, and the same file the unit tests import in Node.</p>
-          </div>
-        </div>
-
-        <div class="files">
-          <a class="file" href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/plugin-word-probe.js">
-            <span class="mono">src/plugin-word-probe.js</span>
-            <p>Custom jsPsych plugin. Fixation, word and square run as one trial on animation frames. The repeat key and the
-              brightness answer are recorded separately, and it supports jsPsych simulation in visual and data modes.</p>
-          </a>
-          <a class="file" href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/analysis.js">
-            <span class="mono">src/analysis.js</span>
-            <p>Per category summaries, RT exclusion, and the cover task scored as d′ with the Hautus log linear correction.
-              The inverse normal is Acklam’s approximation, written out by hand.</p>
-          </a>
-          <a class="file" href="https://github.com/Edwin580/Prolific-Experiment/blob/main/src/design.js">
-            <span class="mono">src/design.js</span>
-            <p>Trial order, repeat pairs, break placement that never splits a pair, and collision safe file names.
-              Every session is seeded and the seed is saved, so <span class="mono">?seed=</span> replays an exact order.</p>
-          </a>
-          <a class="file" href="https://github.com/Edwin580/Prolific-Experiment/tree/main/tests">
-            <span class="mono">tests/</span>
-            <p>Node unit tests for the pure logic. Playwright runs whole simulated sessions, real keypresses, consent refusal
-              and the CSV download. CI also checks every CDN script against a pinned version and SRI hash.</p>
-          </a>
-        </div>
-
-        <div class="actions end">
-          <a class="btn primary" href="experiment.html?demo=1">Run the full demo study</a>
-          <a class="btn" href="experiment.html?simulate=data-only">Jump to a results dashboard</a>
-          <a class="btn" href="https://github.com/Edwin580/Prolific-Experiment">Read the source</a>
-        </div>
+      <section class="refs">
+        <h2>References</h2>
+        <ol>
+          <li>Bridges, D., Pitiot, A., MacAskill, M. R., &amp; Peirce, J. W. (2020). The timing mega-study: comparing a range of experiment generators, both lab-based and online. <i>PeerJ, 8</i>, e9414.</li>
+          <li>de Leeuw, J. R. (2015). jsPsych: A JavaScript library for creating behavioral experiments in a Web browser. <i>Behavior Research Methods, 47</i>(1).</li>
+          <li>Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d′. <i>Behavior Research Methods, Instruments, &amp; Computers, 27</i>(1).</li>
+          <li>Meier, B. P., Robinson, M. D., &amp; Clore, G. L. (2004). Why good guys wear white: Automatic inferences about stimulus valence based on brightness. <i>Psychological Science, 15</i>(2).</li>
+          <li>Meier, B. P., Robinson, M. D., Crawford, L. E., &amp; Ahlvers, W. J. (2007). When “light” and “dark” thoughts become light and dark responses: Affect biases brightness judgments. <i>Emotion, 7</i>(2).</li>
+        </ol>
       </section>
-    </main>
 
-    <footer>
-      <span>Edwin Cortazo</span>
-      <a href="mailto:edwincortazo@gmail.com">edwincortazo@gmail.com</a>
-      <span>Nothing on this page is uploaded anywhere.</span>
-    </footer>
+      <footer>
+        Edwin Cortazo, <a href="mailto:edwincortazo@gmail.com">edwincortazo@gmail.com</a>
+      </footer>
+    </article>
 
     <script src="src/config.js"></script>
     <script src="src/stimuli.js"></script>

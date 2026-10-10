@@ -8,11 +8,11 @@ Built with jsPsych 8 and run on Prolific.
 
 ## Try it
 
-Open `index.html`. The project page has three things you can play with:
+Open `index.html`. It is written as a short paper, in the style of the interactive essays that came before it (Bret Victor's explorable explanations, Distill, Tufte's handouts), and has three working figures:
 
-1. **A short version of the task.** Twelve trials with the real timing. Your rows show up live as you answer, then the page shows that every square was identical and charts your answers by word type.
-2. **A live frame timer.** It measures your display's refresh rate with `requestAnimationFrame` and shows how a target duration (400 ms for the word) turns into whole frames on your screen and on common refresh rates.
-3. **A power simulator.** Set the effect size, how much people differ, the sample size and the trial count. It runs 1,000 simulated studies in the browser, tests each with a one sample t test, and plots the results next to an analytic power curve.
+1. **The task.** Twelve trials with the real timing. Rows appear in a table as you answer, then the page shows that every square was identical and plots your answers by word category.
+2. **Frames.** Your display's frame intervals measured live with `requestAnimationFrame`, and a table showing how a target duration (400 ms for the word) rounds to whole frames on your screen and on common refresh rates.
+3. **Sample size.** Sliders for effect size, spread between people, participants and trials. It runs 1,000 simulated studies in the browser, tests each with a one sample t test, and plots the results next to an analytic power curve.
 
 Other entry points:
 
@@ -20,7 +20,7 @@ Other entry points:
 |---|---|
 | `experiment.html?demo=1` | The full study, shortened |
 | `experiment.html?simulate=visual` | Watch a simulated participant take it |
-| `experiment.html?simulate=data-only` | Skip straight to a results dashboard |
+| `experiment.html?simulate=data-only` | Skip straight to the results screen |
 | `experiment.html?seed=abc` | Replay an exact trial order |
 | `experiment.html?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}` | Live Prolific study |
 
@@ -43,7 +43,7 @@ No build step. Everything is static, so GitHub Pages or any static host works.
 3. Six practice trials with feedback, where the squares really are brighter (174) or darker (162). Repeated once if accuracy is under 50%.
 4. Main block: 74 words plus 6 immediate repeats, all followed by the reference grey. Pressing Space when a word repeats is a cover task that keeps people reading the words. There is a break halfway.
 5. Each word is rated positive, neutral or negative, to check the categories.
-6. Debrief, a personal results dashboard, and a CSV download.
+6. Debrief with the participant's own results, and a CSV download.
 
 Each trial is an 800 ms cross, a 400 ms word, then the square until a response. The gap between trials is 900, 1000 or 1100 ms.
 
@@ -60,7 +60,7 @@ src/design.js              trial order, repeats, break placement, file names
 src/analysis.js            per category summaries, d′, rating agreement
 src/plugin-word-probe.js   custom jsPsych plugin for one whole trial
 src/experiment.js          timeline
-src/results.js             debrief and dashboard
+src/results.js             debrief and results
 tests/unit/                Node tests
 tests/e2e/                 Playwright tests
 ```
@@ -75,7 +75,7 @@ To change timings, words or the completion code you only need `src/config.js` an
 
 **Seeded randomisation.** The seed is saved with the data. `?seed=` reproduces a session's trial order exactly.
 
-**Simulation.** The plugin implements jsPsych's `simulate()` in visual and data only modes. The simulated participant has a built in valence bias so the dashboard has something to show, and it is labelled as simulated.
+**Simulation.** The plugin implements jsPsych's `simulate()` in visual and data only modes. The simulated participant has a built in valence bias so the results screen has something to show, and it is labelled as simulated.
 
 **Scoring.** Responses outside 150 to 3000 ms are excluded from summaries but kept in the raw data. The cover task is scored as d′ with the Hautus (1995) log linear correction, using Acklam's inverse normal approximation.
 

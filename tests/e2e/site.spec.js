@@ -9,12 +9,12 @@ test("project page: the inline task runs, reveals, and the simulator reports pow
     await expect(page.locator("#answer.live")).toBeVisible();
     await page.keyboard.press(i % 2 ? "f" : "j");
   }
-  await expect(page.getByText("Every square you judged was identical.")).toBeVisible();
+  await expect(page.getByText(/All twelve squares were/)).toBeVisible();
   await expect(page.locator("#rows tr")).toHaveCount(12);
   await expect(page.locator(".bar-row")).toHaveCount(3);
 
   await page.locator("#power").scrollIntoViewIfNeeded();
-  await expect(page.locator("#sim-progress")).toHaveText("1000 / 1000", { timeout: 30_000 });
-  await expect(page.locator("#sim-stats")).toContainText("simulated power");
+  await expect(page.locator("#sim-stats")).toContainText("Power from simulation", { timeout: 30_000 });
+  await expect(page.locator("#run")).toBeEnabled({ timeout: 30_000 });
   expect(errors).toEqual([]);
 });

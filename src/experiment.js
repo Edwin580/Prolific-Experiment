@@ -237,7 +237,7 @@
   timeline.push(referenceScreen("Here is the reference square again."));
 
   // Simulated participants carry a modest valence bias so the demo
-  // dashboard has something to show (clearly labelled as simulated).
+  // results screen has something to show (labelled as simulated).
   const simulatedBrightnessBias = { positive: 0.68, neutral: 0.5, negative: 0.34 };
 
   const testTrial = {

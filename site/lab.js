@@ -123,8 +123,8 @@
 
   function appendRow(r, n) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${n}</td><td>${escapeHtml(r.word)}</td><td class="c-${r.category}">${r.category.slice(0, 3)}</td>
-      <td>${r.response}</td><td>${r.rt}</td><td>${r.word_duration_measured}</td>`;
+    tr.innerHTML = `<td>${n}</td><td>${escapeHtml(r.word)}</td><td>${r.category}</td>
+      <td>${r.response}</td><td class="n">${r.rt}</td><td class="n">${r.word_duration_measured.toFixed(1)}</td>`;
     $("rows").appendChild(tr);
     tr.scrollIntoView({ block: "nearest" });
   }
@@ -133,32 +133,28 @@
     task.phase = "idle";
     $("stage-run").hidden = true;
     $("stage-done").hidden = false;
-    $("stage-done").innerHTML = `<p>Done. The reveal is below.</p><button class="btn" id="again">Run it again</button>`;
+    $("stage-done").innerHTML = `<p>That's all twelve.</p><button id="again">Do it again</button>`;
     $("again").addEventListener("click", startTask);
     $("csv").disabled = false;
 
     const s = A.summarize(task.rows, C.design);
-    $("bars").innerHTML = `<div class="bars-title">“Brighter” answers by word type</div>` +
-      CATS.map((c) => {
+    $("bars").innerHTML = CATS.map((c) => {
         const p = s.by_category[c].p_brighter;
         return `<div class="bar-row">
           <span class="bar-label">${c}</span>
-          <span class="bar-track"><span class="bar-fill c-${c}" style="width:${(p ?? 0) * 100}%"></span><span class="bar-mid"></span></span>
+          <span class="bar-track"><span class="bar-fill" style="width:${(p ?? 0) * 100}%"></span><span class="bar-mid"></span></span>
           <span class="bar-val mono">${pct(p)}</span>
         </div>`;
-      }).join("") + `<div class="bars-note">The tick marks 50%, which is what no bias looks like.</div>`;
+      }).join("");
 
     const wd = s.word_duration;
     const fr = median(task.rows.map((r) => r.frame_interval_estimate));
     const eff = s.valence_effect;
     const rts = task.rows.map((r) => r.rt);
-    $("trial-stats").innerHTML = [
-      ["valence effect", eff == null ? "n/a" : `${eff > 0 ? "+" : ""}${Math.round(eff * 100)} pts`],
-      ["median RT", `${Math.round(median(rts))} ms`],
-      ["word on screen", `${wd.mean.toFixed(1)} ms ± ${(wd.sd ?? 0).toFixed(1)}`],
-      ["target", `${C.timing.word_ms} ms`],
-      ["frame interval", `${fr.toFixed(2)} ms`],
-    ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    const effText = eff == null ? "" : `Positive minus negative: ${eff >= 0 ? "+" : "−"}${Math.abs(Math.round(eff * 100))} points. `;
+    $("trial-stats").textContent = `${effText}Median reaction time ${Math.round(median(rts))} ms. ` +
+      `The word was on screen for ${wd.mean.toFixed(1)} ms on average against a target of ${C.timing.word_ms} ms, ` +
+      `with frames of ${fr.toFixed(2)} ms.`;
 
     $("reveal").hidden = false;
     $("reveal").scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -232,7 +228,7 @@
     const top = Math.max(med * 3, 40);
     const bw = w / RING;
     const y = (v) => h - (Math.min(v, top) / top) * (h - 8);
-    const ink = css("--muted"), hot = css("--hot"), line = css("--text-2");
+    const ink = css("--rule"), hot = css("--red"), line = css("--ink-2");
     intervals.forEach((v, i) => {
       ctx.fillStyle = v > med * 1.5 ? hot : ink;
       const yy = y(v);
@@ -246,7 +242,7 @@
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = line;
-    ctx.font = "11px 'IBM Plex Mono', ui-monospace, monospace";
+    ctx.font = "11px 'Source Serif 4', Georgia, serif";
     ctx.fillText(`median ${med.toFixed(2)} ms`, 6, Math.max(12, y(med) - 6));
   }
 
@@ -260,13 +256,8 @@
     const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
     const sd = Math.sqrt(intervals.reduce((a, x) => a + (x - mean) ** 2, 0) / (intervals.length - 1));
     const dropped = intervals.filter((v) => v > med * 1.5).length;
-    $("fps-live").textContent = `${(1000 / med).toFixed(1)} Hz`;
-    $("frame-stats").innerHTML = [
-      ["refresh", `${(1000 / med).toFixed(1)} Hz`],
-      ["median", `${med.toFixed(2)} ms`],
-      ["jitter (SD)", `${sd.toFixed(2)} ms`],
-      ["long frames", `${dropped} of ${intervals.length}`],
-    ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    $("frame-stats").textContent = `Your display runs at about ${(1000 / med).toFixed(1)} Hz. Median frame ` +
+      `${med.toFixed(2)} ms, SD ${sd.toFixed(2)} ms, ${dropped} long ${dropped === 1 ? "frame" : "frames"} in the last ${intervals.length}.`;
     updateQuant();
   }
 
@@ -284,8 +275,8 @@
       const n = Math.max(1, Math.round(target / f));
       const shown = n * f;
       const err = shown - target;
-      return `<tr class="${d.mine ? "mine" : ""}"><td>${d.mine ? `yours, ${d.hz.toFixed(0)} Hz` : d.name}</td><td>${n}</td>
-        <td>${shown.toFixed(1)} ms</td><td class="${Math.abs(err) > f / 4 ? "off" : ""}">${err >= 0 ? "+" : "−"}${Math.abs(err).toFixed(1)}</td></tr>`;
+      return `<tr class="${d.mine ? "mine" : ""}"><td>${d.mine ? `yours (${d.hz.toFixed(0)} Hz)` : d.name}</td><td class="n">${n}</td>
+        <td class="n">${shown.toFixed(1)} ms</td><td class="n${Math.abs(err) > f / 4 ? " off" : ""}">${err >= 0 ? "+" : "−"}${Math.abs(err).toFixed(1)}</td></tr>`;
     }).join("");
   }
 
@@ -325,7 +316,7 @@
       for (let i = 0; i < batch && run.results.length < STUDIES; i++) run.results.push(S.simulateStudy(rand, p));
       const sig = run.results.filter((r) => r.p < 0.05).length;
       run.power = sig / run.results.length;
-      $("sim-progress").textContent = `${run.results.length} / ${STUDIES}`;
+      $("sim-progress").textContent = run.results.length < STUDIES ? `(Running: ${run.results.length} of ${STUDIES}.)` : "";
       drawHist(run);
       if (run.results.length < STUDIES) requestAnimationFrame(step);
       else {
@@ -345,12 +336,11 @@
     for (let n = 3; n <= 5000; n++) {
       if (S.analyticPower({ ...p, n }) >= 0.8) { n80 = n; break; }
     }
-    $("sim-stats").innerHTML = [
-      ["simulated power", pct(run.power)],
-      ["analytic power", pct(S.analyticPower(p))],
-      ["median p", ps.length ? median(ps).toFixed(3) : "n/a"],
-      ["N for 80%", p.effect === 0 ? "never" : n80 ?? "> 5000"],
-    ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    const need = p.effect === 0 ? "With no true effect, no sample size gets there."
+      : n80 == null ? "Even 5,000 people would not reach 80% power."
+      : `About ${n80} people would give 80% power.`;
+    $("sim-stats").innerHTML = `Power from simulation: <b>${pct(run.power)}</b>. ` +
+      `From the approximation: ${pct(S.analyticPower(p))}. Median <i>p</i> = ${ps.length ? median(ps).toFixed(3) : "n/a"}. ${need}`;
   }
 
   const svgNS = "http://www.w3.org/2000/svg";
@@ -391,8 +381,7 @@
        <text class="axis" x="${x(v)}" y="${h - 8}" text-anchor="middle">${label}</text>`;
     out += `<line class="base" x1="${m.l}" x2="${w - m.r}" y1="${h - m.b}" y2="${h - m.b}"/>`;
     out += tick(0, "0", "zero");
-    if (Math.abs(x(p.effect) - x(0)) > 40) out += tick(p.effect, `true ${p.effect.toFixed(3)}`, "truth");
-    out += `<text class="legend" x="${w - m.r}" y="${m.t + 4}" text-anchor="end"><tspan class="l-sig">■</tspan> p &lt; .05  <tspan class="l-non">■</tspan> not significant</text>`;
+    if (Math.abs(x(p.effect) - x(0)) > 40) out += tick(p.effect, `true effect ${p.effect.toFixed(3)}`, "truth");
     svg.innerHTML = out;
   }
 
