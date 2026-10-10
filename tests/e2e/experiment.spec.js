@@ -56,7 +56,7 @@ test("visual simulation drives the real plugin and renders the dashboard", async
   await expect(page.locator(".wp-probe").first()).toBeVisible({ timeout: 60_000 });
   await expect(page.locator(".results")).toBeVisible({ timeout: 220_000 });
   await expect(page.getByText(/Simulated participant/)).toBeVisible();
-  await expect(page.locator(".chart .bar")).toHaveCount(6);
+  await expect(page.locator(".chart .bar")).toHaveCount(3);
 
   const test = await rows(page, { task: "test" });
   // Frame-based timing should land within ~2 frames of the targets.

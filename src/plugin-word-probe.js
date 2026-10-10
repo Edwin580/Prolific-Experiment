@@ -1,8 +1,8 @@
 /**
  * jsPsych 8 plugin: word-probe
  *
- * Runs one complete brightness-judgement trial — fixation cross, prime word,
- * then a grey probe square — as a single jsPsych trial, so all of its data
+ * Runs one complete brightness trial (fixation cross, prime word,
+ * then a grey probe square) as a single jsPsych trial, so all of its data
  * lands in one row.
  *
  * Why a custom plugin rather than three html-keyboard-response trials:
@@ -32,7 +32,7 @@ var jsPsychWordProbe = (function (jspsych) {
       word_duration: { type: jspsych.ParameterType.INT, default: 400 },
       brighter_key: { type: jspsych.ParameterType.KEY, default: "f" },
       darker_key: { type: jspsych.ParameterType.KEY, default: "j" },
-      /** Key for the repeated-word cover task, or null to disable it. */
+      /** Key for the repeated word cover task, or null to disable it. */
       repeat_key: { type: jspsych.ParameterType.KEY, default: null },
       /** "brighter" | "darker" | null (null when there is no correct answer). */
       correct_response: { type: jspsych.ParameterType.STRING, default: null },
@@ -107,7 +107,7 @@ var jsPsychWordProbe = (function (jspsych) {
       let repeatListener = null;
 
       // A display change is committed if the upcoming frame would land at or
-      // past the target — i.e. we switch when less than half a frame remains.
+      // past the target, so we switch when less than half a frame remains.
       const halfFrame = () => (frames.length ? median(frames) / 2 : 8);
 
       const tick = (now) => {

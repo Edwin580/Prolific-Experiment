@@ -1,7 +1,7 @@
 /**
  * Stimulus lists.
  *
- * Words are plain data — presentation (font, size, colour) is handled by the
+ * Words are plain data. Presentation (font, size, colour) is handled by the
  * stylesheet, so this file never contains markup.
  *
  *  - `category`  a-priori valence class: "positive" | "negative" | "neutral"

@@ -1,5 +1,5 @@
 /**
- * Pure analysis helpers used by the end-of-study results dashboard (and
+ * Pure analysis helpers used by the end of study results screen (and
  * reusable offline). Input is plain row objects as produced by jsPsych, so
  * this runs unchanged in the browser and in Node (see tests/analysis.test.js).
  */
