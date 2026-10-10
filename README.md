@@ -1,148 +1,112 @@
-# Brightness Perception Experiment
+# Brightness priming
 
-**Do positive words make a grey square look brighter?** This is an online experiment built with
-[jsPsych 8](https://www.jspsych.org) and run on [Prolific](https://www.prolific.com). Participants read a word, then
-decide whether a grey square is brighter or darker than a reference square. In the main block
-**every square is exactly the reference grey**, so any difference between positive, neutral and
-negative words comes from perception, not from the stimulus.
+Do positive words make a grey square look brighter?
 
-| Try it | URL |
+People read a word, then say whether a grey square is brighter or darker than a reference square. In the main block every square is the same grey as the reference, `rgb(168, 168, 168)`. If positive words still get more "brighter" answers than negative ones, the effect is perceptual, since the stimulus never changes.
+
+Built with jsPsych 8 and run on Prolific.
+
+## Try it
+
+Open `index.html`. The project page has three things you can play with:
+
+1. **A short version of the task.** Twelve trials with the real timing. Your rows show up live as you answer, then the page shows that every square was identical and charts your answers by word type.
+2. **A live frame timer.** It measures your display's refresh rate with `requestAnimationFrame` and shows how a target duration (400 ms for the word) turns into whole frames on your screen and on common refresh rates.
+3. **A power simulator.** Set the effect size, how much people differ, the sample size and the trial count. It runs 1,000 simulated studies in the browser, tests each with a one sample t test, and plots the results next to an analytic power curve.
+
+Other entry points:
+
+| Link | What it does |
 |---|---|
-| Project page | `index.html` |
-| Short demo | `experiment.html?demo=1` |
-| Watch a simulated participant | `experiment.html?simulate=visual` |
-| Jump straight to a results dashboard | `experiment.html?simulate=data-only` |
-| Live Prolific study | `experiment.html?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}` |
+| `experiment.html?demo=1` | The full study, shortened |
+| `experiment.html?simulate=visual` | Watch a simulated participant take it |
+| `experiment.html?simulate=data-only` | Skip straight to a results dashboard |
+| `experiment.html?seed=abc` | Replay an exact trial order |
+| `experiment.html?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}` | Live Prolific study |
 
-The old entry point, `Brightness Perception Experiment_up.html`, still works. It forwards to
-`experiment.html` and keeps the query string, so existing Prolific links don't break.
+The old file `Brightness Perception Experiment_up.html` forwards to `experiment.html` with the query string intact, so existing Prolific links still work.
 
-## Running locally
+## Run it locally
 
 ```bash
-npm install      # dev dependencies only (tests + local copies of the CDN libraries)
+npm install
 npm start        # http://localhost:8080
-npm test         # unit + end-to-end tests
+npm test         # unit tests, then Playwright
 ```
 
-There is no build step. The site is plain static files, so it can be hosted on GitHub Pages, Netlify,
-or any static host.
+No build step. Everything is static, so GitHub Pages or any static host works.
 
-## Procedure
+## The study
 
-1. **Browser check.** Desktop only, window at least 800×600. The screen refresh rate is recorded.
-2. **Consent**, then **fullscreen**.
-3. **Instructions** with a diagram of the trial sequence, then the **reference square** (rgb 168).
-4. **Practice.** 6 trials with feedback, where the squares really are brighter (174) or darker (162).
-   If accuracy is below 50%, the block runs again (at most twice).
-5. **Main block.** 74 words plus 6 immediate repeats, each followed by the reference grey. A cover task
-   (press **Space** when a word repeats) keeps attention on the words. There is a self-paced break
-   halfway through.
-6. **Valence ratings.** Each word is rated positive, neutral or negative. This checks that
-   participants agree with the word categories.
-7. **Debrief** and a personal results dashboard. The data is **downloaded as a CSV file**
-   (automatically in Prolific mode), then the participant returns to Prolific.
+1. Browser check (desktop, at least 800 by 600), consent, fullscreen.
+2. Instructions and the reference square.
+3. Six practice trials with feedback, where the squares really are brighter (174) or darker (162). Repeated once if accuracy is under 50%.
+4. Main block: 74 words plus 6 immediate repeats, all followed by the reference grey. Pressing Space when a word repeats is a cover task that keeps people reading the words. There is a break halfway.
+5. Each word is rated positive, neutral or negative, to check the categories.
+6. Debrief, a personal results dashboard, and a CSV download.
 
-Each trial shows a fixation cross for 800 ms, the word for 400 ms, and then the square until the
-participant responds. The gap between trials is 900, 1000 or 1100 ms.
+Each trial is an 800 ms cross, a 400 ms word, then the square until a response. The gap between trials is 900, 1000 or 1100 ms.
 
-## Project layout
+## Code
 
 ```
-index.html                 project / landing page
-experiment.html            the experiment (loads the scripts below)
-css/experiment.css         styles (uniform grey during the task, colour only on the results page)
-src/config.js              every tunable parameter: timings, luminances, keys, completion code
-src/stimuli.js             practice and test word lists (plain data)
-src/design.js              pure logic: session/mode resolution, trial sequences, break placement, file names
-src/analysis.js            pure logic: per-category summaries, d′, rating agreement
-src/plugin-word-probe.js   custom jsPsych plugin: fixation → word → probe as one frame-timed trial
-src/experiment.js          timeline assembly
-src/results.js             debrief + results dashboard
-tests/unit/                Node test runner tests for design.js and analysis.js
-tests/e2e/                 Playwright tests (simulation runs, real keyboard input, consent, legacy URL)
-scripts/                   static dev server; SRI/version checker
+index.html                 project page
+site/lab.js                interactive demos on the project page
+site/stats.js              t distribution, power, simulation (pure, tested)
+experiment.html            the study
+src/config.js              every parameter: timing, luminance, keys, completion code
+src/stimuli.js             word lists
+src/design.js              trial order, repeats, break placement, file names
+src/analysis.js            per category summaries, d′, rating agreement
+src/plugin-word-probe.js   custom jsPsych plugin for one whole trial
+src/experiment.js          timeline
+src/results.js             debrief and dashboard
+tests/unit/                Node tests
+tests/e2e/                 Playwright tests
 ```
 
-For routine changes (timings, word lists, completion code) you only need to edit `src/config.js`
-and `src/stimuli.js`.
+To change timings, words or the completion code you only need `src/config.js` and `src/stimuli.js`.
 
 ## Technical notes
 
-- **Frame-timed trials.** `plugin-word-probe` changes the display inside `requestAnimationFrame`
-  callbacks and records the measured fixation and word durations and the frame interval on every
-  row, so dropped frames show up in the data.
-- **The two responses are recorded separately.** The repeat key is listened for from word onset until
-  the trial ends, separately from the brighter/darker response. In v1, pressing Space replaced the
-  brightness answer on repeat trials.
-- **Reproducible randomisation.** Each session's RNG seed is saved in the data. Pass `?seed=…` to
-  reproduce a trial order exactly.
-- **Simulation.** The custom plugin supports jsPsych's `simulate()` in both `data-only` and `visual`
-  modes. The simulated participant has a built-in valence bias, so the demo dashboard has something
-  to show. It is clearly labelled as simulated.
-- **Data quality.** Each row carries `blur_events` and `fullscreen_exits`. Responses outside 150–3000 ms
-  are excluded from the summaries. The raw data is always kept.
-- **Data is CSV only.** Nothing is uploaded to a server or third-party service. At the end, the data
-  is exported in the browser as a CSV file. In Prolific mode it downloads automatically
-  (`data.auto_download_in_prolific` in the config); every mode also has a download button. File names
-  are unique (`prolific_<PID>_<timestamp>_<random>.csv`), so files never overwrite each other. The
-  bulky HTML `stimulus` column is left out, because each row already has `word`.
-- **Dependencies.** Every CDN script is pinned to an exact version and has a Subresource Integrity
-  hash. `npm run check:sri` checks both against `package.json`, and CI runs it.
-- **Optional key counterbalancing.** Set `design.counterbalance_keys: true` to swap F/J for a random
-  half of participants. The mapping is recorded in the data.
+**Frame timing.** The plugin changes the display inside `requestAnimationFrame` callbacks and switches on the frame where less than half a frame of the target is left. It saves the measured cross and word durations and the frame interval on every row, so dropped frames are visible in the data.
 
-## Data dictionary (main columns)
+**Two responses per trial.** The repeat key is listened for from word onset to the end of the trial, separately from the brightness answer, so pressing Space never overwrites the judgement.
+
+**Seeded randomisation.** The seed is saved with the data. `?seed=` reproduces a session's trial order exactly.
+
+**Simulation.** The plugin implements jsPsych's `simulate()` in visual and data only modes. The simulated participant has a built in valence bias so the dashboard has something to show, and it is labelled as simulated.
+
+**Scoring.** Responses outside 150 to 3000 ms are excluded from summaries but kept in the raw data. The cover task is scored as d′ with the Hautus (1995) log linear correction, using Acklam's inverse normal approximation.
+
+**Power simulator.** Each simulated participant gets an effect drawn from a normal distribution, answers binomially, and the group is tested with a one sample t test. The t distribution is computed from the regularized incomplete beta function. The analytic curve uses a normal approximation with variance equal to the person to person spread squared plus the binomial noise from both cells. The two agree within a few points.
+
+**Data stays local.** Nothing is uploaded. The data is exported in the browser as CSV, automatically in Prolific mode. File names include the mode, the participant ID, a timestamp and a random suffix so they never collide. Each row also carries `blur_events` and `fullscreen_exits`.
+
+**Dependencies.** Every CDN script is pinned to an exact version with a Subresource Integrity hash. `npm run check:sri` checks them against `package.json` and CI runs it.
+
+## Data columns
 
 | column | meaning |
 |---|---|
 | `task` | `practice`, `test`, `valence`, `instructions`, `consent`, `browser_check`, `fullscreen` |
-| `word`, `category` | prime word and its a-priori valence |
-| `luminance` | probe grey level (always 168 in `test`) |
-| `response` | `brighter` / `darker` (probe trials) |
-| `rt` | brightness response time from probe onset (ms) |
+| `word`, `category` | prime word and its expected valence |
+| `luminance` | grey level of the square (always 168 in `test`) |
+| `response`, `rt` | `brighter` or `darker`, and time from square onset in ms |
 | `correct` | practice only |
-| `is_repeat` | this trial is the second showing of a repeated word (cover-task target) |
-| `has_repeat` | this word is one of the repeated words (true for both of its showings) |
-| `repeat_pressed`, `repeat_rt` | Space pressed on this trial; time from word onset |
-| `fixation_duration_measured`, `word_duration_measured`, `frame_interval_estimate` | timing checks (ms) |
+| `is_repeat` | second showing of a repeated word (cover task target) |
+| `has_repeat` | the word is one of the repeated ones (true for both showings) |
+| `repeat_pressed`, `repeat_rt` | Space was pressed, and time from word onset |
+| `fixation_duration_measured`, `word_duration_measured`, `frame_interval_estimate` | timing checks in ms |
 | `rating` | valence rating (`valence` rows) |
-| `subject_id`, `study_id`, `session_id`, `mode`, `seed`, `experiment_version` | session metadata |
-| `brighter_key`, `darker_key`, `keys_swapped` | response mapping |
-| `blur_events`, `fullscreen_exits` | attention and quality indicators |
-
-## What changed from v1
-
-v1 was a single HTML file. These issues were fixed:
-
-- The DataPipe plugin was loaded **without a version**. It now resolves to a release that requires
-  jsPsych 8, which is incompatible with the jsPsych 7.3.4 the page loaded. DataPipe has been removed;
-  data is now saved as a CSV download.
-- Main-trial `correct_response` was `"g"`, a key that couldn't be pressed. So *correct* was always false,
-  and the debrief's "average response time" (taken over correct trials) came out as `NaN`.
-- Both showings of a repeated word were flagged `repeated: true`. That made the first showing count as
-  a miss, which the debrief tried to patch by doubling the percentage (`× 2`).
-- Pressing Space on a repeat trial **discarded the brightness judgement** for that trial.
-- An unused loop referenced an undefined variable (`repeat_accuracy`).
-- A stray `// datapipe plugin` comment sat outside a `<script>` tag in `<head>`.
-- Data files were named `${PROLIFIC_PID}.csv`. Without a PID this became `null.csv`, so different
-  sessions could collide.
-- There was no consent screen, no browser or size check, no fullscreen, and no attention metrics.
-
-## Notes for the researcher
-
-- `power` appears both in practice (on a brighter probe) and in the main block. Consider swapping one of
-  them, so a word already paired with "brighter" in practice doesn't appear in the test.
-- The probe is 400 px (it was 500 px) so the square and key hints fit on 800×600 screens. Change
-  `probe_size_px` in the config to restore it.
-- The prime word is shown at 28 px (it was 20 px). Change `--word-size` in `css/experiment.css`.
+| `subject_id`, `study_id`, `session_id`, `mode`, `seed`, `experiment_version` | session info |
+| `brighter_key`, `darker_key`, `keys_swapped` | key mapping |
+| `blur_events`, `fullscreen_exits` | attention checks |
 
 ## Ethics
 
-The study uses mild deception: the squares in the main block are all identical, and the repeated-word
-task is a cover task. Both are fully explained in the debrief. Make sure you have ethical approval
-before collecting data.
+The study uses mild deception: the main block squares are all identical and the repeat task is a cover. Both are explained in the debrief. Get ethical approval before collecting data.
 
 ## Contact
 
-Edwin Cortazo — edwincortazo@gmail.com
+Edwin Cortazo, edwincortazo@gmail.com

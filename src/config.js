@@ -15,7 +15,7 @@
     study: {
       name: "Brightness Perception Experiment",
       version: "2.0.0",
-      contact: "Edwin Cortazo — edwincortazo@gmail.com",
+      contact: "Edwin Cortazo, edwincortazo@gmail.com",
       payment: "$2.00",
       estimated_minutes: 10,
     },

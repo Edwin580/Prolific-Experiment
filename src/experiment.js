@@ -113,7 +113,7 @@
   timeline.push({
     type: jsPsychHtmlButtonResponse,
     stimulus: panel(`
-      ${session.mode === "demo" ? `<div class="badge">Demo mode — a shorter version of the study</div>` : ""}
+      ${session.mode === "demo" ? `<div class="badge">Demo mode: a shorter version of the study</div>` : ""}
       <h1>${C.study.name}</h1>
       <p class="lede">A short study about how we perceive brightness.</p>
       <ul class="facts">
@@ -128,7 +128,7 @@
         and linked only to your Prolific ID. There are no known risks. Questions: ${C.study.contact}.</p>
       </details>
       <p>By clicking <em>I agree</em> you confirm you are 18 or older and consent to take part.</p>`),
-    choices: ["I agree — start", "I do not agree"],
+    choices: ["I agree, start", "I do not agree"],
     data: { task: "consent" },
     on_finish: (data) => {
       data.consented = data.response === 0;
@@ -164,7 +164,7 @@
       panel(`<h2>Responding</h2>
         <p>Keep your index fingers on ${kbd(keys.brighter)} and ${kbd(keys.darker)}.</p>
         ${keyLegend()}
-        <p>Respond as quickly and accurately as you can. The differences can be subtle — go with your first impression.</p>`),
+        <p>Respond as quickly and accurately as you can. The differences can be subtle. Go with your first impression.</p>`),
     ],
     show_clickable_nav: true,
     button_label_previous: "Back",
@@ -214,7 +214,7 @@
     timeline: [
       {
         timeline: [continueScreen(`<h2>Let's practise once more</h2>
-          <p>Those were tricky. Here's another short round — compare each square carefully with the reference.</p>
+          <p>Those were tricky. Here's one more short round. Compare each square with the reference.</p>
           ${square(C.luminance.reference)}${keyLegend()}`)],
         conditional_function: () => practiceBlocks > 0,
       },
@@ -228,11 +228,11 @@
     },
   });
 
-  timeline.push(continueScreen(`<h2>Nice work — practice complete</h2>
+  timeline.push(continueScreen(`<h2>Practice complete</h2>
     <p>The main part works the same way, but <strong>without feedback</strong>.</p>
     <p>One extra task: sometimes the <strong>same word appears twice in a row</strong>.
-    When you notice a repeat, press ${kbd(C.keys.repeat)} — any time while the word or square is on screen —
-    and then give your brightness answer as usual.</p>`));
+    When you notice a repeat, press ${kbd(C.keys.repeat)} at any point while the word or square is on screen,
+    then give your brightness answer as usual.</p>`));
 
   timeline.push(referenceScreen("Here is the reference square again."));
 
@@ -279,7 +279,7 @@
       timeline.push(continueScreen(`<h2>Halfway there</h2>
         <p>Take a short break if you like. Press continue when you're ready.</p>
         ${square(C.luminance.reference)}
-        <p class="muted">Reference square — ${kbd(keys.brighter)} brighter · ${kbd(keys.darker)} darker · ${kbd(C.keys.repeat)} repeat</p>`));
+        <p class="muted">Reference square: ${kbd(keys.brighter)} brighter · ${kbd(keys.darker)} darker · ${kbd(C.keys.repeat)} repeat</p>`));
     }
     timeline.push({ timeline: [testTrial], timeline_variables: block });
   });
