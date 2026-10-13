@@ -242,7 +242,7 @@
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = line;
-    ctx.font = "11px 'Source Serif 4', Georgia, serif";
+    ctx.font = "11px 'Helvetica Neue', Helvetica, Arial, sans-serif";
     ctx.fillText(`median ${med.toFixed(2)} ms`, 6, Math.max(12, y(med) - 6));
   }
 
